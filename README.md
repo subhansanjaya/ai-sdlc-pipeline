@@ -23,6 +23,270 @@ The pipeline supports:
 * Deployment Evidence Generation
 * Observability Dashboard
 
+![screenshot](https://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/assets/capture1.png)
+
+![screenshot](https://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/assets/capture2.png)
+
+![screenshot](https://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/assets/capture3.png)
+
+---
+
+---
+
+# Quick Start
+
+Clone the repository:
+
+```bash
+git clone <repository-url>
+cd ai-sdlc-pipeline
+```
+
+Create a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+Activate the environment:
+
+macOS/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Windows:
+
+```powershell
+.venv\Scripts\activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Create a `.env` file:
+
+```env
+OPENAI_API_KEY=your_api_key
+
+OPENAI_MODEL=gpt-4.1-mini
+
+OLLAMA_MODEL=llama3.1
+```
+
+---
+
+# Available CLI Commands
+
+Display available commands:
+
+```bash
+python -m src.cli --help
+```
+
+Available commands:
+
+```text
+version
+
+validate
+plan
+implement
+tests
+deploy
+
+approve-implementation
+approve-deployment
+
+pipeline
+approve
+reject
+
+clean
+```
+
+---
+
+# Manual Pipeline Execution
+
+Validate specification:
+
+```bash
+python -m src.cli validate specs/order_sorting.md
+```
+
+Generate implementation plan:
+
+```bash
+python -m src.cli plan specs/order_sorting.md
+```
+
+Approve implementation:
+
+```bash
+python -m src.cli approve-implementation subhan
+```
+
+Generate implementation:
+
+```bash
+python -m src.cli implement specs/order_sorting.md
+```
+
+Generate tests:
+
+```bash
+python -m src.cli tests specs/order_sorting.md
+```
+
+Approve deployment:
+
+```bash
+python -m src.cli approve-deployment subhan
+```
+
+Generate deployment evidence:
+
+```bash
+python -m src.cli deploy
+```
+
+---
+
+# LangGraph Workflow Execution
+
+Start the workflow:
+
+```bash
+python -m src.cli pipeline specs/order_sorting.md
+```
+
+Expected output:
+
+```text
+Workflow paused awaiting approval.
+```
+
+Approve and continue execution:
+
+```bash
+python -m src.cli approve
+```
+
+Reject the workflow:
+
+```bash
+python -m src.cli reject
+```
+
+Workflow state is persisted to:
+
+```text
+workflow.db
+```
+
+---
+
+# Observability Dashboard
+
+Launch the Streamlit dashboard:
+
+```bash
+streamlit run dashboard.py
+```
+
+Open:
+
+```text
+http://localhost:8501
+```
+
+The dashboard provides visibility into:
+
+* Audit Logs
+* Generated Plans
+* Generated Code
+* Generated Tests
+* Prompt Versions
+* Evaluation Metrics
+* Deployment Evidence
+
+---
+
+# Generated Artefacts
+
+The pipeline generates artefacts under:
+
+```text
+generated/
+```
+
+Examples:
+
+```text
+generated/plans/
+generated/code/
+generated/tests/
+generated/audit/
+generated/approvals/
+generated/deployments/
+generated/evaluation_metrics.json
+generated/traceability.json
+```
+
+Workflow checkpoints are stored separately:
+
+```text
+workflow.db
+```
+
+---
+
+# Development Commands
+
+Run Ruff:
+
+```bash
+ruff check src tests
+```
+
+Run MyPy:
+
+```bash
+mypy src
+```
+
+Run Pytest:
+
+```bash
+pytest
+```
+
+Run all checks before committing changes.
+
+---
+
+# Clean Workspace
+
+Remove generated artefacts and workflow checkpoints:
+
+```bash
+python -m src.cli clean
+```
+
+This removes:
+
+```text
+generated/
+workflow.db
+```
+
+and recreates a clean workspace.
+
 ---
 
 # Architecture
@@ -54,8 +318,6 @@ Audit Trail
       ↓
 Observability Dashboard
 ```
-
----
 
 # Features
 
