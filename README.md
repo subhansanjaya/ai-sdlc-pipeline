@@ -365,6 +365,86 @@ python -m src.cli deploy
 
 ---
 
+## Docker Support
+
+The project can also be executed inside a Docker container without requiring a local Python installation.
+
+### Build Image
+
+```bash
+docker build -t ai-sdlc-pipeline .
+```
+
+### Display Available Commands
+
+```bash
+docker run ai-sdlc-pipeline --help
+```
+
+### Show Version
+
+```bash
+docker run ai-sdlc-pipeline version
+```
+
+### Validate Specification
+
+```bash
+docker run ai-sdlc-pipeline validate specs/order_sorting.md
+```
+
+### Generate Implementation Plan
+
+```bash
+docker run ai-sdlc-pipeline plan specs/order_sorting.md
+```
+
+### Generate Implementation
+
+```bash
+docker run ai-sdlc-pipeline implement specs/order_sorting.md
+```
+
+### Generate Tests
+
+```bash
+docker run ai-sdlc-pipeline tests specs/order_sorting.md
+```
+
+### Persist Generated Artifacts
+
+Generated files inside the container are ephemeral. To persist outputs locally, mount the generated directory:
+
+```bash
+docker run \
+  -v $(pwd)/generated:/app/generated \
+  ai-sdlc-pipeline \
+  plan specs/order_sorting.md
+```
+
+This maps the local `generated/` folder to the container so generated plans, code, tests, approvals, audit logs, and deployment evidence are available outside the container.
+
+### Environment Variables
+
+If using OpenAI, pass environment variables when running the container:
+
+```bash
+docker run \
+  -e OPENAI_API_KEY=<your-api-key> \
+  ai-sdlc-pipeline \
+  plan specs/order_sorting.md
+```
+
+### Rebuild After Changes
+
+Whenever source code or dependencies change, rebuild the image:
+
+```bash
+docker build -t ai-sdlc-pipeline .
+```
+
+---
+
 # Design Decisions
 
 * Modular architecture
