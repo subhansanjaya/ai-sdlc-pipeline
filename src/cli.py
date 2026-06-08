@@ -49,6 +49,13 @@ from langgraph.types import (
     Command,
 )
 
+from src.workflow.state import (
+    PipelineState,
+)
+
+from langchain_core.runnables import (
+    RunnableConfig,
+)
 
 
 # Main CLI application.
@@ -256,67 +263,41 @@ def pipeline(
         ↓
     Planning
         ↓
-    Human Approval
+    Approval Gate
         ↓
     Implementation
         ↓
     Test Generation
         ↓
     Complete
-
-    Demonstrates agent orchestration and
-    human-in-the-loop approval using LangGraph.
     """
 
-    # Load specification and initialize workflow state.
     spec = load_spec(path)
 
-    # Execute the LangGraph workflow.
-    config = {
+    # Thread identifier used by LangGraph
+    # to persist and recover workflow state.
+    config: RunnableConfig = {
         "configurable": {
-            "thread_id":
-                "order_sorting"
+            "thread_id": "order_sorting",
         }
     }
 
+    initial_state: PipelineState = {
+        "spec": spec,
+        "plan": None,
+        "code": None,
+        "tests": None,
+    }
+
     result = workflow.invoke(
-        {
-            "spec": spec,
-            "plan": None,
-            "code": None,
-            "tests": None,
-        },
+        initial_state,
         config=config,
     )
-    if "__interrupt__" in result:
 
+    if "__interrupt__" in result:
         print(
             "Workflow paused awaiting approval."
         )
-
-        return
-
-# To demonstrate manual resumption of the workflow after approval,
-# we can implement a resume command. In a real application, this would likely be triggered by an event or callback after the human approval step is completed.
-# @app.command()
-# def resume() -> None:
-#     """
-#     Resume a paused workflow.
-#     """
-
-#     result = workflow.invoke(
-#         Command(
-#             resume=True
-#         ),
-#         config={
-#             "configurable": {
-#                 "thread_id":
-#                     "order_sorting"
-#             }
-#         }
-#     )
-
-#     print(result)
 
 
 @app.command()
@@ -335,6 +316,8 @@ def approve() -> None:
                     "order_sorting"
             }
         }
+
+        
     )
 
     print(
@@ -347,18 +330,19 @@ def reject() -> None:
     Reject a paused workflow.
     """
 
+    config: RunnableConfig = {
+        "configurable": {
+            "thread_id": "order_sorting",
+        }
+    }
+
     try:
 
         workflow.invoke(
             Command(
                 resume="reject"
             ),
-            config={
-                "configurable": {
-                    "thread_id":
-                        "order_sorting"
-                }
-            }
+            config=config,
         )
 
     except ValueError:
@@ -366,7 +350,6 @@ def reject() -> None:
         print(
             "Workflow rejected."
         )
-
 @app.command()
 def clean() -> None:
     """
@@ -377,7 +360,7 @@ def clean() -> None:
     """
 
     db_file = Path(
-    "workflow.db"
+        "workflow.db"
     )
 
     if db_file.exists():
