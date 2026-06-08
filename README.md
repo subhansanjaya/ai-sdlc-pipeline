@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI SDLC Pipeline is a prototype framework that transforms structured feature specifications into implementation artefacts using AI-assisted workflows and deterministic quality controls.
+AI SDLC Pipeline is a prototype framework that transforms structured feature specifications into implementation artefacts using AI-assisted workflows and automated quality checks.
 
 The project demonstrates how Large Language Models (LLMs), workflow orchestration, human approvals, auditability, observability, and software engineering governance can be combined to support an AI-assisted Software Development Lifecycle (SDLC).
 
@@ -687,8 +687,7 @@ docker build -t ai-sdlc-pipeline .
 
 # Usage and Deployment
 
-Refer to: [Link](ttps://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/docs/AI_SDLC_Usage_and_Deployment_Guide.md)
-
+For more details, see the [Usage and Deployment Guide](https://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/docs/AI_SDLC_Usage_and_Deployment_Guide.md).
 ---
 
 # License
