@@ -62,4 +62,23 @@ graph.add_edge(
     END,
 )
 
-workflow = graph.compile()
+# workflow = graph.compile()
+
+from langgraph.checkpoint.sqlite import (
+    SqliteSaver,
+)
+
+import sqlite3
+
+conn = sqlite3.connect(
+    "workflow.db",
+    check_same_thread=False,
+)
+
+checkpointer = SqliteSaver(
+    conn
+)
+
+workflow = graph.compile(
+    checkpointer=checkpointer
+)

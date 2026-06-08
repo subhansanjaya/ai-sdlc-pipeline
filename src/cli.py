@@ -45,6 +45,11 @@ from src.services.deployment_service import (
 # LangGraph workflow
 from src.workflow.graph import workflow
 
+from langgraph.types import (
+    Command,
+)
+
+
 
 # Main CLI application.
 # Each command represents a stage in the SDLC pipeline.
@@ -267,17 +272,100 @@ def pipeline(
     spec = load_spec(path)
 
     # Execute the LangGraph workflow.
+    config = {
+        "configurable": {
+            "thread_id":
+                "order_sorting"
+        }
+    }
+
     result = workflow.invoke(
         {
             "spec": spec,
             "plan": None,
             "code": None,
             "tests": None,
+        },
+        config=config,
+    )
+    if "__interrupt__" in result:
+
+        print(
+            "Workflow paused awaiting approval."
+        )
+
+        return
+
+# To demonstrate manual resumption of the workflow after approval,
+# we can implement a resume command. In a real application, this would likely be triggered by an event or callback after the human approval step is completed.
+# @app.command()
+# def resume() -> None:
+#     """
+#     Resume a paused workflow.
+#     """
+
+#     result = workflow.invoke(
+#         Command(
+#             resume=True
+#         ),
+#         config={
+#             "configurable": {
+#                 "thread_id":
+#                     "order_sorting"
+#             }
+#         }
+#     )
+
+#     print(result)
+
+
+@app.command()
+def approve() -> None:
+    """
+    Approve a paused workflow and continue execution.
+    """
+
+    workflow.invoke(
+        Command(
+            resume="approve"
+        ),
+        config={
+            "configurable": {
+                "thread_id":
+                    "order_sorting"
+            }
         }
     )
 
-    print(result)
+    print(
+        "Workflow approved and completed."
+    )
 
+@app.command()
+def reject() -> None:
+    """
+    Reject a paused workflow.
+    """
+
+    try:
+
+        workflow.invoke(
+            Command(
+                resume="reject"
+            ),
+            config={
+                "configurable": {
+                    "thread_id":
+                        "order_sorting"
+                }
+            }
+        )
+
+    except ValueError:
+
+        print(
+            "Workflow rejected."
+        )
 
 @app.command()
 def clean() -> None:
@@ -287,6 +375,13 @@ def clean() -> None:
     Useful during development and demos to
     reset the workspace and start fresh.
     """
+
+    db_file = Path(
+    "workflow.db"
+    )
+
+    if db_file.exists():
+        db_file.unlink()
 
     generated = Path(
         "generated"
@@ -305,7 +400,6 @@ def clean() -> None:
     print(
         "Generated artifacts removed"
     )
-
 
 if __name__ == "__main__":
     app()
