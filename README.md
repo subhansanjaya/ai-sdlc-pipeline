@@ -685,15 +685,9 @@ docker build -t ai-sdlc-pipeline .
 * Role-based approval workflows
 * Multiple concurrent workflow executions
 
----
-
 # Usage and Deployment
 
-Refer to:
-
-```text
-docs/AI_SDLC_Usage_and_Deployment_Guide.md
-```
+Refer to: [Link](ttps://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/docs/AI_SDLC_Usage_and_Deployment_Guide.md)
 
 ---
 
