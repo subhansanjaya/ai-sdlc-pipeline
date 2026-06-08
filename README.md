@@ -25,11 +25,11 @@ The pipeline supports:
 
 ![screenshot](https://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/assets/capture1.png)
 
+![screenshot](https://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/assets/capture4.png)
+
 ![screenshot](https://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/assets/capture2.png)
 
 ![screenshot](https://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/assets/capture3.png)
-
----
 
 ---
 
@@ -111,6 +111,41 @@ clean
 
 ---
 
+# LangGraph Workflow Execution
+
+Start the workflow:
+
+```bash
+python -m src.cli pipeline specs/order_sorting.md
+```
+
+Note: order_sorting.md is a sample specification created for testing purposes.
+
+Expected output:
+
+```text
+Workflow paused awaiting approval.
+```
+
+Approve and continue execution:
+
+```bash
+python -m src.cli approve
+```
+
+Reject the workflow:
+
+```bash
+python -m src.cli reject
+```
+
+Workflow state is persisted to:
+
+```text
+workflow.db
+```
+---
+
 # Manual Pipeline Execution
 
 Validate specification:
@@ -146,47 +181,13 @@ python -m src.cli tests specs/order_sorting.md
 Approve deployment:
 
 ```bash
-python -m src.cli approve-deployment subhan
+python -m src.cli approve-deployment approverName
 ```
 
 Generate deployment evidence:
 
 ```bash
 python -m src.cli deploy
-```
-
----
-
-# LangGraph Workflow Execution
-
-Start the workflow:
-
-```bash
-python -m src.cli pipeline specs/order_sorting.md
-```
-
-Expected output:
-
-```text
-Workflow paused awaiting approval.
-```
-
-Approve and continue execution:
-
-```bash
-python -m src.cli approve
-```
-
-Reject the workflow:
-
-```bash
-python -m src.cli reject
-```
-
-Workflow state is persisted to:
-
-```text
-workflow.db
 ```
 
 ---
@@ -684,15 +685,9 @@ docker build -t ai-sdlc-pipeline .
 * Role-based approval workflows
 * Multiple concurrent workflow executions
 
----
-
 # Usage and Deployment
 
-Refer to:
-
-```text
-docs/AI_SDLC_Usage_and_Deployment_Guide.md
-```
+Refer to: [Link](ttps://github.com/subhansanjaya/ai-sdlc-pipeline/blob/main/docs/AI_SDLC_Usage_and_Deployment_Guide.md)
 
 ---
 

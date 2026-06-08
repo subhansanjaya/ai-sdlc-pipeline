@@ -1,72 +1,235 @@
-# AI SDLC Pipeline - Usage, Deployment and Future Roadmap
+# AI SDLC Pipeline - Usage, Deployment and Future Enhancements
 
-## How Someone Uses This Project
+## Overview
 
-### Current Prototype Workflow
+This project demonstrates how AI, workflow orchestration, human approvals, auditability, and observability can be combined to support an AI-assisted Software Development Lifecycle (SDLC).
 
+The project transforms structured feature specifications into implementation plans, generated code, automated tests, approval records, audit artefacts, evaluation metrics, and deployment evidence while maintaining governance and traceability.
+
+---
+
+# How Someone Uses This Project
+
+## Current Prototype Workflow
+
+```text
 Product Manager / Business Analyst
-→ Creates Feature Specification
-→ Developer runs CLI commands
-→ AI generates implementation plan
-→ Human approval
-→ AI generates code
-→ AI generates tests
-→ Quality gates run
-→ Human deployment approval
-→ Deployment evidence generated
+        ↓
+Creates Feature Specification
+        ↓
+Developer Starts Workflow
+        ↓
+AI Planning Agent Generates Plan
+        ↓
+LangGraph Creates Checkpoint
+        ↓
+Human Approval Gate
+        ↓
+AI Implementation Agent Generates Code
+        ↓
+AI Test Agent Generates Tests
+        ↓
+Evaluation Metrics Generated
+        ↓
+Quality Gates Executed
+        ↓
+Deployment Approval
+        ↓
+Deployment Evidence Generated
+        ↓
+Observability Dashboard
+```
 
-## Example End-to-End Usage
+The workflow demonstrates how AI-generated outputs can be governed through approval checkpoints and workflow orchestration before progressing to later stages of delivery.
 
-python -m src.cli validate specs/order_sorting.md
-python -m src.cli plan specs/order_sorting.md
-python -m src.cli approve-implementation subhan
-python -m src.cli implement specs/order_sorting.md
-python -m src.cli tests specs/order_sorting.md
-python -m src.cli approve-deployment subhan
-python -m src.cli deploy
+---
 
-## Who Uses It
+# Who Uses It
 
-- Product Owner / Business Analyst
-- AI Planner
-- Tech Lead
-- AI Implementation Agent
-- AI Test Agent
-- Release Manager
-- Auditor
+## Product Owner / Business Analyst
 
-## Current Deployment Model
+Creates and maintains feature specifications that describe business requirements.
 
-The prototype does not perform a real cloud deployment.
-It generates deployment evidence demonstrating governance and approval workflows.
+## Technical Lead
 
-## Production Version Options
+Reviews implementation plans and approves generated outputs before implementation begins.
 
-1. GitHub-centric workflow
-2. Web application (React + FastAPI)
-3. Jira integration
+## AI Planning Agent
 
-## AWS Deployment Architecture
+Generates implementation plans, technical design summaries, risks, and testing strategies.
 
+## AI Implementation Agent
+
+Generates implementation code based on approved specifications and plans.
+
+## AI Test Agent
+
+Generates automated tests and traceability information.
+
+## Release Manager
+
+Approves deployment activities and deployment evidence.
+
+## Auditor
+
+Reviews approvals, workflow history, generated artefacts, and evaluation metrics.
+
+---
+
+# Current Capabilities
+
+The prototype currently demonstrates:
+
+* Specification validation
+* AI-assisted implementation planning
+* AI-assisted code generation
+* AI-assisted test generation
+* LangGraph workflow orchestration
+* SQLite workflow checkpointing
+* Human approval gates
+* Approve / Reject workflow decisions
+* Prompt version management
+* Audit logging
+* Evaluation metrics generation
+* Deployment evidence generation
+* Streamlit observability dashboard
+
+---
+
+# Current Deployment Model
+
+The current implementation focuses on demonstrating governance, workflow orchestration, and traceability.
+
+The project does not currently perform a cloud deployment. This generates deployment evidence that simulates the governance and approval activities typically required before a production deployment.
+
+---
+
+# Potential Enterprise Deployment
+
+A production deployment could integrate AI SDLC Pipeline into an enterprise software delivery ecosystem.
+
+```text
 GitHub
-→ GitHub Actions
-→ Docker Build
-→ Amazon ECR
-→ Amazon ECS/EKS
-→ Production
+    ↓
+GitHub Actions
+    ↓
+Docker Build
+    ↓
+Container Registry
+    ↓
+Kubernetes / ECS
+    ↓
+Production Environment
+```
 
-## Future Improvements
+Supporting services:
 
-- LangGraph orchestration
-- Structured LLM outputs
-- GitHub PR automation
-- AWS ECS deployment
-- Kubernetes deployment
-- FastAPI backend
-- React frontend
-- Jira integration
-- Persistent audit database
+```text
+Application Layer
+    ├── FastAPI Backend
+    ├── React Frontend
+    └── LangGraph Workflow Engine
 
-## Summary
+Persistence Layer
+    ├── PostgreSQL
+    ├── Redis
+    └── Object Storage
 
-This project demonstrates an AI-assisted SDLC pipeline that converts structured feature specifications into implementation plans, generated code, automated tests, approval records, audit logs, and deployment evidence while enforcing governance and quality controls.
+Observability Layer
+    ├── Metrics
+    ├── Logging
+    └── Monitoring
+```
+
+---
+
+# Example Enterprise Workflow
+
+```text
+Business Requirement
+        ↓
+Specification Creation
+        ↓
+AI Planning
+        ↓
+Technical Review
+        ↓
+AI Implementation
+        ↓
+Automated Testing
+        ↓
+Pull Request Creation
+        ↓
+Code Review
+        ↓
+Deployment Approval
+        ↓
+Production Deployment
+```
+
+This allows human oversight to remain in the delivery process while reducing manual effort through AI-assisted automation.
+
+---
+
+# Future Enhancements
+
+## Workflow Enhancements
+
+* Multi-stage approval workflows
+* Workflow execution history
+* Workflow visualization
+* Parallel agent execution
+* Multiple concurrent workflow instances
+
+## AI Enhancements
+
+* Structured LLM outputs using JSON Schema
+* Multi-agent code review
+* Automated code quality analysis
+* Change impact analysis
+* Automated documentation generation
+
+## Platform Enhancements
+
+* FastAPI backend
+* React frontend
+* Role-based access control
+* Multi-user workflow management
+
+## Integrations
+
+* GitHub Pull Request automation
+* Jira integration
+* Azure DevOps integration
+* Slack notifications
+* Microsoft Teams notifications
+
+## Infrastructure Enhancements
+
+* PostgreSQL workflow persistence
+* Distributed checkpoint storage
+* Kubernetes deployment
+* Cloud-native deployment patterns
+* Multi-environment support
+
+---
+
+# Example Use Cases
+
+## Internal Enterprise Development
+
+Generate implementation plans, code, and tests for internal business applications while maintaining governance and auditability.
+
+## Regulated Industries
+
+Support approval workflows and audit trails required by regulated industries such as finance, healthcare, and aviation.
+
+## AI Governance Demonstrations
+
+Show how AI-assisted software delivery can include human oversight, traceability, approval workflows, and deployment controls.
+
+## Engineering Productivity Initiatives
+
+Accelerate planning, implementation, and testing activities while preserving review and approval processes.
+
+---
