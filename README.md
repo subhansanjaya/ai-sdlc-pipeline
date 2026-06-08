@@ -2,7 +2,9 @@
 
 ## Overview
 
-AI SDLC Pipeline is a prototype framework that transforms a structured feature specification into implementation artefacts using AI-assisted workflows and deterministic quality controls.
+AI SDLC Pipeline is a prototype framework that transforms structured feature specifications into implementation artefacts using AI-assisted workflows and deterministic quality controls.
+
+The project demonstrates how Large Language Models (LLMs), workflow orchestration, human approvals, auditability, observability, and software engineering governance can be combined to support an AI-assisted Software Development Lifecycle (SDLC).
 
 The pipeline supports:
 
@@ -13,13 +15,13 @@ The pipeline supports:
 * Automated Test Generation
 * Human Approval Workflows
 * LangGraph Workflow Orchestration
+* SQLite Workflow Checkpointing
+* Approve / Reject Workflow Gates
 * Prompt Version Management
 * Audit Logging
 * Evaluation Metrics
 * Deployment Evidence Generation
 * Observability Dashboard
-
-The goal is to demonstrate traceability, governance, reproducibility, and human oversight across an AI-assisted software delivery lifecycle.
 
 ---
 
@@ -32,7 +34,11 @@ Validation
       ↓
 Planning Agent
       ↓
-Human Approval
+SQLite Checkpoint
+      ↓
+Approval Gate
+      ↓
+Approve / Reject
       ↓
 Implementation Agent
       ↓
@@ -61,7 +67,7 @@ Supported formats:
 * YAML (.yaml / .yml)
 * JSON (.json)
 
-The pipeline validates that required sections exist before processing.
+The pipeline validates specifications before processing.
 
 ---
 
@@ -103,18 +109,24 @@ Generates:
 
 ## Human Approval Workflow
 
-Approval checkpoints before:
+Approval checkpoints exist before:
 
 * Implementation
 * Deployment
 
-Additionally, the project includes a LangGraph-based workflow with a human approval node that pauses execution before implementation.
+The LangGraph workflow supports persistent workflow checkpointing using SQLite.
+
+When approval is required, the workflow:
+
+1. Saves workflow state
+2. Pauses execution
+3. Waits for approval
+4. Allows explicit approval or rejection
+5. Continues only after approval
 
 ---
 
 ## LangGraph Workflow Orchestration
-
-The project includes a LangGraph workflow that orchestrates the software delivery lifecycle.
 
 Workflow:
 
@@ -123,7 +135,11 @@ Specification
       ↓
 Planning
       ↓
-Human Approval
+Checkpoint
+      ↓
+Approval Gate
+      ↓
+Approve / Reject
       ↓
 Implementation
       ↓
@@ -134,14 +150,35 @@ This demonstrates:
 
 * Agent orchestration
 * Shared workflow state
+* Persistent workflow checkpointing
 * Human-in-the-loop approval
+* Workflow recovery
 * End-to-end SDLC automation
+
+---
+
+## Workflow Persistence
+
+Workflow state is persisted using SQLite.
+
+Benefits:
+
+* Survives application restarts
+* Supports long-running approval processes
+* Demonstrates production-style workflow orchestration
+* Enables workflow recovery
+
+Checkpoint database:
+
+```text
+workflow.db
+```
 
 ---
 
 ## Prompt Version Management
 
-Prompts are versioned and loaded through a centralized configuration mechanism.
+Prompts are versioned and loaded centrally.
 
 Benefits:
 
@@ -205,423 +242,125 @@ A Streamlit dashboard provides visibility into:
 
 ---
 
-# Project Structure
+# LangGraph Workflow
 
-```text
-ai-sdlc-pipeline/
-
-├── .github/
-│   └── workflows/
-│       └── ci.yml
-│
-├── docs/
-│
-├── specs/
-│
-├── src/
-│   ├── agents/
-│   ├── models/
-│   ├── parser/
-│   ├── prompts/
-│   ├── providers/
-│   ├── services/
-│   ├── validators/
-│   └── workflow/
-│       ├── state.py
-│       ├── nodes.py
-│       └── graph.py
-│
-├── tests/
-│
-├── generated/
-│   ├── plans/
-│   ├── code/
-│   ├── tests/
-│   ├── approvals/
-│   ├── audit/
-│   ├── deployments/
-│   └── evaluation_metrics.json
-│
-├── dashboard.py
-├── requirements.txt
-├── pyproject.toml
-├── Dockerfile
-└── README.md
-```
-
----
-
-# Prerequisites
-
-* Python 3.12
-* Git
-
-Recommended:
-
-* VS Code
-
----
-
-# Installation
-
-Clone repository:
-
-```bash
-git clone <repository-url>
-cd ai-sdlc-pipeline
-```
-
-Create virtual environment:
-
-```bash
-python -m venv .venv
-```
-
-Activate virtual environment:
-
-macOS/Linux:
-
-```bash
-source .venv/bin/activate
-```
-
-Windows:
-
-```powershell
-.venv\Scripts\activate
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-# Configuration
-
-Create a `.env` file:
-
-```env
-OPENAI_API_KEY=your_api_key
-
-OPENAI_MODEL=gpt-4.1-mini
-
-OLLAMA_MODEL=llama3.1
-```
-
-Provider configuration:
-
-```yaml
-provider: openai
-```
-
-or
-
-```yaml
-provider: ollama
-```
-
-Prompt configuration:
-
-```yaml
-planner_prompt_version: planner_v1
-implementation_prompt_version: implementation_v1
-test_prompt_version: tests_v1
-```
-
----
-
-# Running the Pipeline
-
-## Validate Specification
-
-A sample specification is included:
-
-```text
-specs/order_sorting.md
-```
-
-Validate the specification:
-
-```bash
-python -m src.cli validate specs/order_sorting.md
-```
-
----
-
-## Generate Implementation Plan
-
-```bash
-python -m src.cli plan specs/order_sorting.md
-```
-
-Output:
-
-```text
-generated/plans/plan.json
-```
-
----
-
-## Approve Implementation
-
-```bash
-python -m src.cli approve-implementation subhan
-```
-
-Output:
-
-```text
-generated/approvals/implementation.json
-```
-
----
-
-## Generate Implementation
-
-```bash
-python -m src.cli implement specs/order_sorting.md
-```
-
-Output:
-
-```text
-generated/code/
-```
-
----
-
-## Generate Tests
-
-```bash
-python -m src.cli tests specs/order_sorting.md
-```
-
-Output:
-
-```text
-generated/tests/
-generated/traceability.json
-generated/evaluation_metrics.json
-```
-
----
-
-## Approve Deployment
-
-```bash
-python -m src.cli approve-deployment subhan
-```
-
----
-
-## Generate Deployment Evidence
-
-```bash
-python -m src.cli deploy
-```
-
-Output:
-
-```text
-generated/deployments/deployment_evidence.json
-```
-
----
-
-## Run End-to-End LangGraph Workflow
-
-Execute the complete workflow using LangGraph:
+## Start Workflow
 
 ```bash
 python -m src.cli pipeline specs/order_sorting.md
 ```
 
-Workflow:
+Expected output:
 
 ```text
-Specification
-      ↓
-Planning
-      ↓
-Human Approval
-      ↓
-Implementation
-      ↓
-Test Generation
+Workflow paused awaiting approval.
 ```
 
-When prompted:
+Workflow state is persisted to:
 
 ```text
-Approve implementation? (y/n):
+workflow.db
 ```
-
-Enter:
-
-```text
-y
-```
-
-to continue execution.
 
 ---
 
-## Clean Generated Artifacts
+## Approve Workflow
 
-Remove all generated files and start with a clean workspace:
+Continue execution from the saved checkpoint:
+
+```bash
+python -m src.cli approve
+```
+
+The workflow resumes from the approval checkpoint and continues with:
+
+* Implementation Generation
+* Test Generation
+* Evaluation Metrics
+
+---
+
+## Reject Workflow
+
+Reject the workflow:
+
+```bash
+python -m src.cli reject
+```
+
+Expected output:
+
+```text
+Workflow rejected.
+```
+
+No additional workflow steps are executed.
+
+---
+
+## Clean Workspace
+
+Remove generated artefacts and workflow checkpoints:
 
 ```bash
 python -m src.cli clean
 ```
 
-This removes all generated artifacts and recreates an empty generated directory.
-
----
-
-# Quality Gates
-
-Run linting:
-
-```bash
-ruff check src tests
-```
-
-Run type checking:
-
-```bash
-mypy src
-```
-
-Run tests:
-
-```bash
-pytest
-```
-
----
-
-# GitHub Actions
-
-CI pipeline executes:
-
-* Ruff
-* MyPy
-* CLI Smoke Test
-* Pytest
-
-Workflow file:
+Removes:
 
 ```text
-.github/workflows/ci.yml
-```
-
-The CLI smoke test verifies that the application starts successfully and all imports resolve correctly.
-
----
-
-# Observability Dashboard
-
-Install dashboard dependencies:
-
-```bash
-pip install streamlit pandas
-```
-
-Launch dashboard:
-
-```bash
-streamlit run dashboard.py
-```
-
-The dashboard displays:
-
-* Audit Logs
-* Evaluation Metrics
-* Generated Plans
-* Generated Tests
-* Prompt Versions
-* Deployment Activity
-
-Dashboard data is sourced from:
-
-```text
-generated/audit/
-generated/evaluation_metrics.json
-generated/approvals/
-generated/deployments/
-```
-
----
-
-# Example End-to-End Execution
-
-```bash
-python -m src.cli validate specs/order_sorting.md
-
-python -m src.cli plan specs/order_sorting.md
-
-python -m src.cli approve-implementation subhan
-
-python -m src.cli implement specs/order_sorting.md
-
-python -m src.cli tests specs/order_sorting.md
-
-python -m src.cli approve-deployment subhan
-
-python -m src.cli deploy
-```
-
-Or execute the LangGraph workflow:
-
-```bash
-python -m src.cli pipeline specs/order_sorting.md
+generated/
+workflow.db
 ```
 
 ---
 
 # Docker Support
 
-The project can also be executed inside a Docker container without requiring a local Python installation.
-
-## Build Image
+Build image:
 
 ```bash
 docker build -t ai-sdlc-pipeline .
 ```
 
-## Display Available Commands
+Display available commands:
 
 ```bash
 docker run ai-sdlc-pipeline --help
 ```
 
-## Show Version
+Show version:
 
 ```bash
 docker run ai-sdlc-pipeline version
 ```
 
-## Run LangGraph Workflow
+Run workflow:
 
 ```bash
 docker run ai-sdlc-pipeline pipeline specs/order_sorting.md
 ```
 
-## Persist Generated Artifacts
+Persist generated artefacts and workflow checkpoints:
 
 ```bash
 docker run \
   -v $(pwd)/generated:/app/generated \
+  -v $(pwd)/workflow.db:/app/workflow.db \
   ai-sdlc-pipeline \
   pipeline specs/order_sorting.md
 ```
 
-This maps the local generated directory to the container so generated plans, code, tests, approvals, audit logs, metrics, and deployment evidence remain available outside the container.
+This persists:
 
-## Environment Variables
+* Generated artefacts
+* Audit logs
+* Evaluation metrics
+* Workflow checkpoints
+
+allowing workflows to be resumed after container restarts.
+
+Pass environment variables:
 
 ```bash
 docker run \
@@ -630,7 +369,7 @@ docker run \
   plan specs/order_sorting.md
 ```
 
-## Rebuild After Changes
+Rebuild image after changes:
 
 ```bash
 docker build -t ai-sdlc-pipeline .
@@ -643,26 +382,27 @@ docker build -t ai-sdlc-pipeline .
 * Modular architecture
 * Provider abstraction for OpenAI and Ollama
 * LangGraph workflow orchestration
-* Human approval checkpoints
+* SQLite-based workflow checkpointing
+* Human approval gates with Approve / Reject actions
 * Prompt version management
 * File-based audit trail
 * Deterministic validation before execution
+* Streamlit-based observability dashboard
 
 ---
 
 # Trade-Offs
 
 * Simplicity over enterprise-scale orchestration
+* SQLite checkpointing instead of distributed workflow storage
 * File-based storage instead of database persistence
 * Prompt-driven planning rather than strict structured outputs
-* Human approvals are currently CLI-based
 
 ---
 
 # Limitations
 
 * Generated code quality depends on model capability
-* Approval workflow is file-based
 * Deployment is simulated through evidence generation
 * Limited change impact analysis
 * Dashboard uses generated files rather than live telemetry
@@ -671,19 +411,22 @@ docker build -t ai-sdlc-pipeline .
 
 # Future Improvements
 
-* Advanced LangGraph checkpoint/resume workflows
+* Distributed workflow checkpoint storage (PostgreSQL / Redis)
 * Structured LLM outputs using JSON Schema
 * GitHub Pull Request automation
 * Multi-agent code review
 * Persistent audit database
 * Policy-as-code governance controls
 * Cloud deployment support (AWS, Azure, GCP)
+* Workflow visualization and execution history
+* Role-based approval workflows
+* Multiple concurrent workflow executions
 
 ---
 
 # Usage and Deployment
 
-Please refer to:
+Refer to:
 
 ```text
 docs/AI_SDLC_Usage_and_Deployment_Guide.md

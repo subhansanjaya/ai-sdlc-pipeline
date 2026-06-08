@@ -1,6 +1,12 @@
+import sqlite3
+
+from langgraph.checkpoint.sqlite import (
+    SqliteSaver,
+)
+
 from langgraph.graph import (
-    StateGraph,
     END,
+    StateGraph,
 )
 
 from src.workflow.state import (
@@ -14,10 +20,14 @@ from src.workflow.nodes import (
     test_node,
 )
 
+
+# Create workflow graph using the shared
+# PipelineState object.
 graph = StateGraph(
     PipelineState
 )
 
+# Register workflow nodes.
 graph.add_node(
     "plan",
     planning_node,
@@ -38,10 +48,12 @@ graph.add_node(
     test_node,
 )
 
+# Define workflow entry point.
 graph.set_entry_point(
     "plan"
 )
 
+# Define workflow execution path.
 graph.add_edge(
     "plan",
     "approve",
@@ -62,4 +74,21 @@ graph.add_edge(
     END,
 )
 
-workflow = graph.compile()
+# SQLite checkpoint persistence.
+#
+# LangGraph stores workflow state here,
+# allowing workflows to pause, survive
+# application restarts, and resume later.
+conn = sqlite3.connect(
+    "workflow.db",
+    check_same_thread=False,
+)
+
+checkpointer = SqliteSaver(
+    conn
+)
+
+# Compile workflow with checkpoint support.
+workflow = graph.compile(
+    checkpointer=checkpointer
+)
