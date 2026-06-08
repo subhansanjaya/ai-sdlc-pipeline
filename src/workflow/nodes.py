@@ -10,8 +10,6 @@ from src.services.implementation_service import (
     generate_implementation,
 )
 
-from langgraph.types import interrupt
-
 from src.services.test_generation_service import (
     generate_tests,
 )
