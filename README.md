@@ -12,10 +12,14 @@ The pipeline supports:
 * AI-Assisted Code Generation
 * Automated Test Generation
 * Human Approval Workflows
+* LangGraph Workflow Orchestration
+* Prompt Version Management
 * Audit Logging
+* Evaluation Metrics
 * Deployment Evidence Generation
+* Observability Dashboard
 
-The goal is to demonstrate traceability, governance, and reproducibility across an AI-assisted software delivery lifecycle.
+The goal is to demonstrate traceability, governance, reproducibility, and human oversight across an AI-assisted software delivery lifecycle.
 
 ---
 
@@ -26,19 +30,23 @@ Specification
       ↓
 Validation
       ↓
-Planning Layer
+Planning Agent
       ↓
-Implementation Approval
+Human Approval
       ↓
-AI-Assisted Implementation
+Implementation Agent
       ↓
-Test Generation
+Test Generation Agent
+      ↓
+Evaluation Metrics
       ↓
 Deployment Approval
       ↓
 Deployment Evidence
       ↓
 Audit Trail
+      ↓
+Observability Dashboard
 ```
 
 ---
@@ -55,6 +63,8 @@ Supported formats:
 
 The pipeline validates that required sections exist before processing.
 
+---
+
 ## Planning Layer
 
 Generates:
@@ -64,6 +74,8 @@ Generates:
 * Impacted Modules
 * Risks
 * Test Strategy
+
+---
 
 ## AI-Assisted Implementation
 
@@ -77,6 +89,8 @@ Supported providers:
 * OpenAI
 * Ollama
 
+---
+
 ## Automated Test Generation
 
 Generates:
@@ -85,12 +99,84 @@ Generates:
 * Integration Tests
 * Acceptance Tests
 
+---
+
 ## Human Approval Workflow
 
 Approval checkpoints before:
 
 * Implementation
 * Deployment
+
+Additionally, the project includes a LangGraph-based workflow with a human approval node that pauses execution before implementation.
+
+---
+
+## LangGraph Workflow Orchestration
+
+The project includes a LangGraph workflow that orchestrates the software delivery lifecycle.
+
+Workflow:
+
+```text
+Specification
+      ↓
+Planning
+      ↓
+Human Approval
+      ↓
+Implementation
+      ↓
+Test Generation
+```
+
+This demonstrates:
+
+* Agent orchestration
+* Shared workflow state
+* Human-in-the-loop approval
+* End-to-end SDLC automation
+
+---
+
+## Prompt Version Management
+
+Prompts are versioned and loaded through a centralized configuration mechanism.
+
+Benefits:
+
+* Prompt traceability
+* Easier experimentation
+* Reproducible AI outputs
+* Auditability
+
+Example:
+
+```yaml
+planner_prompt_version: planner_v1
+implementation_prompt_version: implementation_v1
+test_prompt_version: tests_v1
+```
+
+---
+
+## Evaluation Metrics
+
+The pipeline generates evaluation metrics for AI-generated outputs.
+
+Metrics include:
+
+* Prompt Version
+* Test Length
+* Acceptance Criteria Count
+
+Output:
+
+```text
+generated/evaluation_metrics.json
+```
+
+---
 
 ## Auditability
 
@@ -101,6 +187,21 @@ Captures:
 * Generated Outputs
 * Validation Results
 * Deployment Evidence
+* Prompt Versions
+
+---
+
+## Observability Dashboard
+
+A Streamlit dashboard provides visibility into:
+
+* Audit Events
+* Generated Plans
+* Implementations
+* Tests
+* Prompt Versions
+* Evaluation Metrics
+* Deployment Activity
 
 ---
 
@@ -113,15 +214,22 @@ ai-sdlc-pipeline/
 │   └── workflows/
 │       └── ci.yml
 │
+├── docs/
+│
 ├── specs/
 │
 ├── src/
 │   ├── agents/
 │   ├── models/
 │   ├── parser/
+│   ├── prompts/
 │   ├── providers/
 │   ├── services/
-│   └── validators/
+│   ├── validators/
+│   └── workflow/
+│       ├── state.py
+│       ├── nodes.py
+│       └── graph.py
 │
 ├── tests/
 │
@@ -131,10 +239,13 @@ ai-sdlc-pipeline/
 │   ├── tests/
 │   ├── approvals/
 │   ├── audit/
-│   └── deployment/
+│   ├── deployments/
+│   └── evaluation_metrics.json
 │
+├── dashboard.py
 ├── requirements.txt
 ├── pyproject.toml
+├── Dockerfile
 └── README.md
 ```
 
@@ -212,13 +323,27 @@ or
 provider: ollama
 ```
 
+Prompt configuration:
+
+```yaml
+planner_prompt_version: planner_v1
+implementation_prompt_version: implementation_v1
+test_prompt_version: tests_v1
+```
+
 ---
 
 # Running the Pipeline
 
 ## Validate Specification
 
-Note: I have added a simple specification to test the functionality order_sorting.md
+A sample specification is included:
+
+```text
+specs/order_sorting.md
+```
+
+Validate the specification:
 
 ```bash
 python -m src.cli validate specs/order_sorting.md
@@ -243,7 +368,7 @@ generated/plans/plan.json
 ## Approve Implementation
 
 ```bash
-python -m src.cli approve-implementation nameOfTheApprover
+python -m src.cli approve-implementation subhan
 ```
 
 Output:
@@ -279,6 +404,7 @@ Output:
 ```text
 generated/tests/
 generated/traceability.json
+generated/evaluation_metrics.json
 ```
 
 ---
@@ -286,7 +412,7 @@ generated/traceability.json
 ## Approve Deployment
 
 ```bash
-python -m src.cli approve-deployment nameOfTheApprover
+python -m src.cli approve-deployment subhan
 ```
 
 ---
@@ -300,8 +426,58 @@ python -m src.cli deploy
 Output:
 
 ```text
-generated/deployment/deployment_evidence.json
+generated/deployments/deployment_evidence.json
 ```
+
+---
+
+## Run End-to-End LangGraph Workflow
+
+Execute the complete workflow using LangGraph:
+
+```bash
+python -m src.cli pipeline specs/order_sorting.md
+```
+
+Workflow:
+
+```text
+Specification
+      ↓
+Planning
+      ↓
+Human Approval
+      ↓
+Implementation
+      ↓
+Test Generation
+```
+
+When prompted:
+
+```text
+Approve implementation? (y/n):
+```
+
+Enter:
+
+```text
+y
+```
+
+to continue execution.
+
+---
+
+## Clean Generated Artifacts
+
+Remove all generated files and start with a clean workspace:
+
+```bash
+python -m src.cli clean
+```
+
+This removes all generated artifacts and recreates an empty generated directory.
 
 ---
 
@@ -333,14 +509,49 @@ CI pipeline executes:
 
 * Ruff
 * MyPy
+* CLI Smoke Test
 * Pytest
-
-
 
 Workflow file:
 
 ```text
 .github/workflows/ci.yml
+```
+
+The CLI smoke test verifies that the application starts successfully and all imports resolve correctly.
+
+---
+
+# Observability Dashboard
+
+Install dashboard dependencies:
+
+```bash
+pip install streamlit pandas
+```
+
+Launch dashboard:
+
+```bash
+streamlit run dashboard.py
+```
+
+The dashboard displays:
+
+* Audit Logs
+* Evaluation Metrics
+* Generated Plans
+* Generated Tests
+* Prompt Versions
+* Deployment Activity
+
+Dashboard data is sourced from:
+
+```text
+generated/audit/
+generated/evaluation_metrics.json
+generated/approvals/
+generated/deployments/
 ```
 
 ---
@@ -363,70 +574,54 @@ python -m src.cli approve-deployment subhan
 python -m src.cli deploy
 ```
 
+Or execute the LangGraph workflow:
+
+```bash
+python -m src.cli pipeline specs/order_sorting.md
+```
+
 ---
 
-## Docker Support
+# Docker Support
 
 The project can also be executed inside a Docker container without requiring a local Python installation.
 
-### Build Image
+## Build Image
 
 ```bash
 docker build -t ai-sdlc-pipeline .
 ```
 
-### Display Available Commands
+## Display Available Commands
 
 ```bash
 docker run ai-sdlc-pipeline --help
 ```
 
-### Show Version
+## Show Version
 
 ```bash
 docker run ai-sdlc-pipeline version
 ```
 
-### Validate Specification
+## Run LangGraph Workflow
 
 ```bash
-docker run ai-sdlc-pipeline validate specs/order_sorting.md
+docker run ai-sdlc-pipeline pipeline specs/order_sorting.md
 ```
 
-### Generate Implementation Plan
-
-```bash
-docker run ai-sdlc-pipeline plan specs/order_sorting.md
-```
-
-### Generate Implementation
-
-```bash
-docker run ai-sdlc-pipeline implement specs/order_sorting.md
-```
-
-### Generate Tests
-
-```bash
-docker run ai-sdlc-pipeline tests specs/order_sorting.md
-```
-
-### Persist Generated Artifacts
-
-Generated files inside the container are ephemeral. To persist outputs locally, mount the generated directory:
+## Persist Generated Artifacts
 
 ```bash
 docker run \
   -v $(pwd)/generated:/app/generated \
   ai-sdlc-pipeline \
-  plan specs/order_sorting.md
+  pipeline specs/order_sorting.md
 ```
 
-This maps the local `generated/` folder to the container so generated plans, code, tests, approvals, audit logs, and deployment evidence are available outside the container.
+This maps the local generated directory to the container so generated plans, code, tests, approvals, audit logs, metrics, and deployment evidence remain available outside the container.
 
-### Environment Variables
-
-If using OpenAI, pass environment variables when running the container:
+## Environment Variables
 
 ```bash
 docker run \
@@ -435,9 +630,7 @@ docker run \
   plan specs/order_sorting.md
 ```
 
-### Rebuild After Changes
-
-Whenever source code or dependencies change, rebuild the image:
+## Rebuild After Changes
 
 ```bash
 docker build -t ai-sdlc-pipeline .
@@ -449,7 +642,9 @@ docker build -t ai-sdlc-pipeline .
 
 * Modular architecture
 * Provider abstraction for OpenAI and Ollama
+* LangGraph workflow orchestration
 * Human approval checkpoints
+* Prompt version management
 * File-based audit trail
 * Deterministic validation before execution
 
@@ -460,6 +655,7 @@ docker build -t ai-sdlc-pipeline .
 * Simplicity over enterprise-scale orchestration
 * File-based storage instead of database persistence
 * Prompt-driven planning rather than strict structured outputs
+* Human approvals are currently CLI-based
 
 ---
 
@@ -469,25 +665,32 @@ docker build -t ai-sdlc-pipeline .
 * Approval workflow is file-based
 * Deployment is simulated through evidence generation
 * Limited change impact analysis
+* Dashboard uses generated files rather than live telemetry
 
 ---
 
 # Future Improvements
 
-* LangGraph workflow orchestration
+* Advanced LangGraph checkpoint/resume workflows
 * Structured LLM outputs using JSON Schema
 * GitHub Pull Request automation
 * Multi-agent code review
-* Containerized execution
 * Persistent audit database
 * Policy-as-code governance controls
+* Cloud deployment support (AWS, Azure, GCP)
 
 ---
 
-# usage and Deployment
+# Usage and Deployment
 
-Please refer to [Link Text](docs/AI_SDLC_Usage_and_Deployment_Guide.md) 
+Please refer to:
 
-## License
+```text
+docs/AI_SDLC_Usage_and_Deployment_Guide.md
+```
+
+---
+
+# License
 
 This project is licensed under the MIT License. See the LICENSE file for details.

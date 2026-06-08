@@ -1,3 +1,18 @@
+"""
+CLI entry point for the AI SDLC Pipeline.
+
+Supports both:
+- Manual stage-by-stage execution
+- End-to-end LangGraph workflow execution
+
+This file orchestrates specification validation,
+planning, implementation, testing, approvals,
+deployment evidence generation, and cleanup.
+"""
+
+import shutil
+from pathlib import Path
+
 import typer
 
 # Specification loading and validation
@@ -31,7 +46,8 @@ from src.services.deployment_service import (
 from src.workflow.graph import workflow
 
 
-# Main CLI application
+# Main CLI application.
+# Each command represents a stage in the SDLC pipeline.
 app = typer.Typer()
 
 
@@ -70,8 +86,10 @@ def plan(
 
     validate_spec(spec)
 
+    # Generate implementation plan using the Planner Agent.
     plan = create_plan(spec)
 
+    # Persist the plan for downstream stages.
     save_plan(plan)
 
     print("Plan generated")
@@ -87,13 +105,16 @@ def implement(
 
     spec = load_spec(path)
 
-    # Ensure implementation approval exists
+    # Ensure implementation approval exists.
     verify_approval(
         "implementation"
     )
 
+    # Load previously generated implementation plan.
     plan = load_plan()
 
+    # Generate implementation code from the
+    # specification and implementation plan.
     code = generate_implementation(
         spec,
         plan,
@@ -104,7 +125,7 @@ def implement(
         code,
     )
 
-    # Create a simple summary of generated changes
+    # Create a summary of generated changes.
     create_summary(
         "order_sorting.py"
     )
@@ -124,8 +145,10 @@ def tests(
 
     spec = load_spec(path)
 
+    # Load implementation plan for test context.
     plan = load_plan()
 
+    # Generate AI-assisted tests.
     generated_tests = generate_tests(
         spec,
         plan,
@@ -135,7 +158,7 @@ def tests(
         generated_tests
     )
 
-    # Map acceptance criteria to generated tests
+    # Map acceptance criteria to generated tests.
     generate_traceability(
         spec
     )
@@ -199,10 +222,13 @@ def deploy() -> None:
     Generate deployment evidence after approval.
     """
 
+    # Deployment requires explicit approval.
     verify_approval(
         "deployment"
     )
 
+    # Generate deployment evidence for
+    # audit and compliance purposes.
     generate_deployment_evidence()
 
     print(
@@ -218,7 +244,10 @@ def pipeline(
     Execute the complete SDLC workflow using LangGraph.
 
     Flow:
+
     Specification
+        ↓
+    Validation
         ↓
     Planning
         ↓
@@ -227,12 +256,17 @@ def pipeline(
     Implementation
         ↓
     Test Generation
+        ↓
+    Complete
+
+    Demonstrates agent orchestration and
+    human-in-the-loop approval using LangGraph.
     """
 
-    spec = load_spec(
-        path
-    )
+    # Load specification and initialize workflow state.
+    spec = load_spec(path)
 
+    # Execute the LangGraph workflow.
     result = workflow.invoke(
         {
             "spec": spec,
@@ -243,6 +277,34 @@ def pipeline(
     )
 
     print(result)
+
+
+@app.command()
+def clean() -> None:
+    """
+    Remove all generated artifacts.
+
+    Useful during development and demos to
+    reset the workspace and start fresh.
+    """
+
+    generated = Path(
+        "generated"
+    )
+
+    if generated.exists():
+
+        shutil.rmtree(
+            generated
+        )
+
+    generated.mkdir(
+        exist_ok=True
+    )
+
+    print(
+        "Generated artifacts removed"
+    )
 
 
 if __name__ == "__main__":
