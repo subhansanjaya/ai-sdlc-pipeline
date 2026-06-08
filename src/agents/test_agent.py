@@ -66,7 +66,7 @@ class TestAgent:
             "tests_generated",
             {
                 "prompt_version":
-                    test_prompt,
+                    test_version,
                 "feature_objective":
                     spec.feature_objective,
                 "test_length":

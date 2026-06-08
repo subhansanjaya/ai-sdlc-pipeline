@@ -1,3 +1,5 @@
+from typing import Any
+
 import yaml
 
 from src.prompts.registry import (
@@ -7,13 +9,15 @@ from src.prompts.registry import (
 
 def _load_prompt(
     config_key: str,
-):
+) -> dict[str, Any]:
 
-    config = yaml.safe_load(
-        open(
-            "config.yaml"
+    with open(
+        "config.yaml"
+    ) as file:
+
+        config = yaml.safe_load(
+            file
         )
-    )
 
     version = config[
         config_key
@@ -24,21 +28,21 @@ def _load_prompt(
     ]
 
 
-def load_planner_prompt():
+def load_planner_prompt() -> dict[str, Any]:
 
     return _load_prompt(
         "planner_prompt_version"
     )
 
 
-def load_implementation_prompt():
+def load_implementation_prompt() -> dict[str, Any]:
 
     return _load_prompt(
         "implementation_prompt_version"
     )
 
 
-def load_test_prompt():
+def load_test_prompt() -> dict[str, Any]:
 
     return _load_prompt(
         "test_prompt_version"
