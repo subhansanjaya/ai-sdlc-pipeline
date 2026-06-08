@@ -2,6 +2,11 @@ import json
 import logging
 import re
 
+
+from src.prompts.prompt_loader import (
+    load_planner_prompt,
+)
+
 from src.models.plan import (
     ImplementationPlan,
 )
@@ -58,51 +63,70 @@ class PlannerAgent:
         # {spec.non_functional_requirements}
         # """
 
-        prompt = f"""
-        You are a software architect.
+        # prompt = f"""
+        # You are a software architect.
 
-        Return ONLY valid JSON.
+        # Return ONLY valid JSON.
 
-        Do not return markdown.
-        Do not return explanations.
-        Do not return feature summaries.
-        Do not return user stories.
-        Do not return business rules.
-        Do not return acceptance criteria.
+        # Do not return markdown.
+        # Do not return explanations.
+        # Do not return feature summaries.
+        # Do not return user stories.
+        # Do not return business rules.
+        # Do not return acceptance criteria.
 
-        Return EXACTLY this JSON structure:
+        # Return EXACTLY this JSON structure:
 
-        {{
-        "implementation_tasks": [
-            "task 1"
-        ],
-        "technical_design_summary": "summary",
-        "impacted_modules": [
-            "module"
-        ],
-        "risks": [
-            "risk"
-        ],
-        "test_strategy": [
-            "test strategy"
+        # {{
+        # "implementation_tasks": [
+        #     "task 1"
+        # ],
+        # "technical_design_summary": "summary",
+        # "impacted_modules": [
+        #     "module"
+        # ],
+        # "risks": [
+        #     "risk"
+        # ],
+        # "test_strategy": [
+        #     "test strategy"
+        # ]
+        # }}
+
+        # Feature Objective:
+        # {spec.feature_objective}
+
+        # User Story:
+        # {spec.user_story}
+
+        # Business Rules:
+        # {spec.business_rules}
+
+        # Acceptance Criteria:
+        # {spec.acceptance_criteria}
+
+        # Non Functional Requirements:
+        # {spec.non_functional_requirements}
+        # """
+
+        prompt_config = load_planner_prompt()
+
+        planner_prompt = prompt_config[
+            "template"
         ]
-        }}
 
-        Feature Objective:
-        {spec.feature_objective}
-
-        User Story:
-        {spec.user_story}
-
-        Business Rules:
-        {spec.business_rules}
-
-        Acceptance Criteria:
-        {spec.acceptance_criteria}
-
-        Non Functional Requirements:
-        {spec.non_functional_requirements}
-        """
+        planner_version = prompt_config[
+            "version"
+        ]
+        prompt = planner_prompt.format(
+            feature_objective=spec.feature_objective,
+            user_story=spec.user_story,
+            business_rules="\n".join(spec.business_rules),
+            acceptance_criteria="\n".join(spec.acceptance_criteria),
+            non_functional_requirements="\n".join(
+                spec.non_functional_requirements
+            ),
+        )
 
         response = self.provider.generate(
             prompt
@@ -125,6 +149,21 @@ class PlannerAgent:
             json_match.group(0)
         )
 
+        from src.services.audit_service import (
+            write_audit_record,
+        )
+
+        write_audit_record(
+            "plan_generated",
+            {
+               "prompt_version":
+                    planner_version,
+                "model":
+                    "gpt-4.1-mini",
+                "feature_objective":
+                    spec.feature_objective,
+            },
+        )
 
         required_fields = [
             "implementation_tasks",

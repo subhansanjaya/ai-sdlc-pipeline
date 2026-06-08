@@ -1,5 +1,9 @@
 import re
 
+from src.prompts.prompt_loader import (
+    load_implementation_prompt,
+)
+
 from src.models.plan import (
     ImplementationPlan,
 )
@@ -12,12 +16,17 @@ from src.providers.base import (
     LLMProvider,
 )
 
+from src.services.audit_service import (
+    write_audit_record,
+)
+
+
 class ImplementationAgent:
 
     def __init__(
         self,
         provider: LLMProvider,
-    ):
+    ) -> None:
         self.provider = provider
 
     def generate_code(
@@ -25,54 +34,29 @@ class ImplementationAgent:
         spec: FeatureSpecification,
         plan: ImplementationPlan,
     ) -> str:
+        
+        prompt_config = load_implementation_prompt()
 
-        #         prompt = f"""
-        # You are a senior software engineer.
+        implementation_prompt = prompt_config[
+            "template"
+        ]
 
-        # Generate ONLY Python code.
+        implementation_version = prompt_config[
+            "version"
+        ]
 
-        # Feature Objective:
-        # {spec.feature_objective}
-
-        # Business Rules:
-        # {spec.business_rules}
-
-        # Acceptance Criteria:
-        # {spec.acceptance_criteria}
-
-        # Implementation Plan:
-        # {plan.model_dump_json(indent=2)}
-
-        # Return code only.
-        # """
-
-        prompt = f"""
-        You are implementing a feature.
-
-        Generate ONE Python module only.
-
-        Requirements:
-
-        - Generate implementation code only
-        - Do NOT generate tests
-        - Do NOT generate explanations
-        - Do NOT generate markdown
-        - Do NOT generate database code
-        - Do NOT generate APIs
-        - Do NOT generate classes unless required
-        - Return only executable Python code
-
-        Feature Objective:
-        {spec.feature_objective}
-
-        Business Rules:
-        {spec.business_rules}
-
-        Acceptance Criteria:
-        {spec.acceptance_criteria}
-
-        The generated code must directly implement the acceptance criteria.
-        """
+        prompt = implementation_prompt.format(
+            feature_objective=spec.feature_objective,
+            business_rules="\n".join(
+                spec.business_rules
+            ),
+            acceptance_criteria="\n".join(
+                spec.acceptance_criteria
+            ),
+            implementation_plan=plan.model_dump_json(
+                indent=2
+            ),
+        )
 
         response = self.provider.generate(
             prompt
@@ -80,6 +64,22 @@ class ImplementationAgent:
 
         code = self._extract_code(
             response
+        )
+
+        write_audit_record(
+            "implementation_generated",
+            {
+                "prompt_version":
+                    implementation_version,
+                "feature_objective":
+                    spec.feature_objective,
+                "code_length":
+                    len(code),
+                "implementation_tasks":
+                    len(
+                        plan.implementation_tasks
+                    ),
+            },
         )
 
         return code
