@@ -20,6 +20,9 @@ from src.services.audit_service import (
     write_audit_record,
 )
 
+from src.services.evaluation_service import (
+    write_metrics,
+)
 
 class TestAgent:
 
@@ -60,6 +63,16 @@ class TestAgent:
 
         tests = self._extract_code(
             response
+        )
+
+        write_metrics(
+            {
+                "prompt_version": test_version,
+                "test_length": len(tests),
+                "acceptance_criteria_count": len(
+                    spec.acceptance_criteria
+                ),
+            }
         )
 
         write_audit_record(
