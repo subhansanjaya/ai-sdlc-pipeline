@@ -1,17 +1,18 @@
 from fastapi import APIRouter
-from .schemas import PipelineRequest, PipelineResponse
 
-# from src.services.pipeline_service import PipelineService
+from .schemas import PipelineRequest, PipelineResponse
 from src.services.workflow_service import WorkflowService
-from src.services.spec_service import load_spec
-# from typing import Any
-# pipeline_service = PipelineService()
 
 router = APIRouter()
+
 workflow_service = WorkflowService()
+
 
 @router.get("/")
 def root() -> dict[str, str]:
+    """
+    Root endpoint.
+    """
     return {
         "message": "AI SDLC Pipeline API"
     }
@@ -19,19 +20,25 @@ def root() -> dict[str, str]:
 
 @router.get("/health")
 def health() -> dict[str, str]:
+    """
+    Health check endpoint.
+    """
     return {
         "status": "healthy"
     }
 
-# @router.post("/pipeline/run")
-# def run_pipeline(request: PipelineRequest):
 
-#     return pipeline_service.run(request)
-@router.post("/pipeline/run")
-def run_pipeline(request: PipelineRequest) -> PipelineResponse:
+@router.post(
+    "/pipeline/run",
+    response_model=PipelineResponse,
+)
+def run_pipeline(
+    request: PipelineRequest,
+) -> PipelineResponse:
+    """
+    Execute the AI SDLC workflow from a specification file.
+    """
 
-    spec = load_spec(request.path)
-
-    result = workflow_service.run(spec)
-
-    return result
+    return workflow_service.run_from_path(
+        request.path
+    )
