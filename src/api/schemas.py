@@ -5,3 +5,7 @@ class PipelineRequest(BaseModel):
     provider: str = "openai"
     model: str = "gpt-4.1-mini"
     path: str
+
+class PipelineResponse(BaseModel):
+    thread_id: str
+    status: str

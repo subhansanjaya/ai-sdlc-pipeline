@@ -312,7 +312,7 @@ def pipeline(path: str) -> None:
 
     result = workflow_service.run(spec)
 
-    if result["status"] == "waiting_for_approval":
+    if result.status == "waiting_for_approval":
         print("Workflow paused awaiting approval.")
 
 @app.command()
