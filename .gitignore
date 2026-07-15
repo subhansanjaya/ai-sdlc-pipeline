@@ -28,3 +28,8 @@ generated/
 # Coverage
 .coverage
 htmlcov/
+
+# SQLite database
+workflow.db
+workflow.db-shm
+workflow.db-wal

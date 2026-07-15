@@ -57,6 +57,8 @@ from langchain_core.runnables import (
     RunnableConfig,
 )
 
+from src.services.workflow_service import WorkflowService
+workflow_service = WorkflowService()
 
 # Main CLI application.
 # Each command represents a stage in the SDLC pipeline.
@@ -248,57 +250,70 @@ def deploy() -> None:
     )
 
 
+# @app.command()
+# def pipeline(
+#     path: str,
+# ) -> None:
+#     """
+#     Execute the complete SDLC workflow using LangGraph.
+
+#     Flow:
+
+#     Specification
+#         ↓
+#     Validation
+#         ↓
+#     Planning
+#         ↓
+#     Approval Gate
+#         ↓
+#     Implementation
+#         ↓
+#     Test Generation
+#         ↓
+#     Complete
+#     """
+
+#     spec = load_spec(path)
+
+#     # Thread identifier used by LangGraph
+#     # to persist and recover workflow state.
+#     config: RunnableConfig = {
+#         "configurable": {
+#             "thread_id": "order_sorting",
+#         }
+#     }
+
+#     initial_state: PipelineState = {
+#         "spec": spec,
+#         "plan": None,
+#         "code": None,
+#         "tests": None,
+#     }
+
+#     result = workflow.invoke(
+#         initial_state,
+#         config=config,
+#     )
+
+#     if "__interrupt__" in result:
+#         print(
+#             "Workflow paused awaiting approval."
+#         )
 @app.command()
-def pipeline(
-    path: str,
-) -> None:
+def pipeline(path: str) -> None:
     """
-    Execute the complete SDLC workflow using LangGraph.
-
-    Flow:
-
-    Specification
-        ↓
-    Validation
-        ↓
-    Planning
-        ↓
-    Approval Gate
-        ↓
-    Implementation
-        ↓
-    Test Generation
-        ↓
-    Complete
+    Execute the complete SDLC workflow.
     """
 
     spec = load_spec(path)
 
-    # Thread identifier used by LangGraph
-    # to persist and recover workflow state.
-    config: RunnableConfig = {
-        "configurable": {
-            "thread_id": "order_sorting",
-        }
-    }
+    # workflow_service = WorkflowService()
 
-    initial_state: PipelineState = {
-        "spec": spec,
-        "plan": None,
-        "code": None,
-        "tests": None,
-    }
+    result = workflow_service.run(spec)
 
-    result = workflow.invoke(
-        initial_state,
-        config=config,
-    )
-
-    if "__interrupt__" in result:
-        print(
-            "Workflow paused awaiting approval."
-        )
-
+    if result["status"] == "waiting_for_approval":
+        print("Workflow paused awaiting approval.")
 
 @app.command()
 def approve() -> None:
