@@ -5,6 +5,7 @@ from langchain_core.runnables import RunnableConfig
 from src.workflow.graph import workflow
 from src.workflow.state import PipelineState
 from src.models.spec import FeatureSpecification
+from typing import Any
 
 
 class WorkflowService:
@@ -13,7 +14,7 @@ class WorkflowService:
         self,
         spec: FeatureSpecification,
         thread_id: str | None = None,
-    ):
+    ) -> dict[str, Any]:
 
         if thread_id is None:
             thread_id = str(uuid.uuid4())
